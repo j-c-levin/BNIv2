@@ -27,3 +27,5 @@ sysinfo.txt
 BNIv2/Library/
 BNIv2/ProjectSettings/
 *.meta
+BNIv2/Assets/Library/
+BNIv2/Assets/ProjectSettings/
