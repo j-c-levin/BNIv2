@@ -37,4 +37,22 @@ public class Player : MonoBehaviour
             }
 #endif
     }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.layer == 8)
+        {
+            //Hit a cell
+            Destroy(other.gameObject);
+            //Also do points and energy and stuff here
+        }
+    }
+
+    void OnTriggerStay2D(Collider2D other)
+    {
+        if (other.gameObject.layer == 9)
+        {
+            //Player is out of bounds, do punishment stuff
+        }
+    }
 }
