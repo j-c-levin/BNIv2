@@ -1,122 +1,159 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 
 public class BlockManager : MonoBehaviour
 {
 
-    public CameraMovement mainCamera;
-    public float initialCameraSpeed;
-    public float cameraSpeedModifier;
-    float cameraSpeed;
+	public CameraMovement mainCamera;
+	public float initialCameraSpeed;
+	public float cameraSpeedModifier;
+	public float cameraSpeedCeiling;
+	float cameraSpeed;
 
-    public GameObject[] blockGroups;
+	public Text scoreText;
+	public int initialScorePerSecond;
+	public float scoreUpdateRate;
+	public float scoreModifierRate;
+	float scoreModifier;
+	float playerScore;
 
-    public GameObject[] cellGroups;
+	public Text gameOverText;
 
-    public int initialLoopCountLevel;
-    public int loopCountModifier;
-    int loopCountLevel;
-    int loopCount;
+	public GameObject[] blockGroups;
 
-    public float initialDropSpeed;
-    public float dropSpeedModifier;
-    float dropSpeed;
+	public GameObject[] cellGroups;
 
-    public float initialDelayDuration;
-    public float delayDurtionModifier;
-    float delayDuration;
+	public int initialLoopCountLevel;
+	public float loopCountModifier;
+	int loopCountLevel;
+	int loopCount;
 
-    bool begin = true;
+	public float initialDelayDuration;
+	public float delayDurtionModifier;
+	public float delayDurationFloor;
+	float delayDuration;
 
-    // Use this for initialization
-    void Start()
-    {
-        cameraSpeed = initialCameraSpeed;
-        dropSpeed = initialDropSpeed;
-        delayDuration = initialDelayDuration;
-        loopCountLevel = initialLoopCountLevel;
-    }
+	bool begin = true;
 
-    void Update()
-    {
-        if (begin)
-        {
+	float endTime;
+
+	// Use this for initialization
+	void Start ()
+	{
+		cameraSpeed = initialCameraSpeed;
+		delayDuration = initialDelayDuration;
+		loopCountLevel = initialLoopCountLevel;
+		scoreModifier = 1;
+		playerScore = 0;
+		scoreText.text = playerScore.ToString ();
+	}
+
+	void Update ()
+	{
+		if (begin) {
 #if UNITY_STANDALONE || UNITY_WEBGL
-            if (Input.GetButtonDown("Horizontal"))
-            {
-                begin = false;
-                mainCamera.speed = cameraSpeed;
-                StartCoroutine("blockLoop");
-            }
+			if (Input.GetButtonDown ("Horizontal")) {
+				begin = false;
+				mainCamera.speed = cameraSpeed;
+				StartCoroutine ("blockLoop");
+				StartCoroutine ("score");
+			}
 
 #elif UNITY_ANDROID
-
-         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-         {
-            begin = false;
-        mainCamera.speed = cameraSpeed;
-        StartCoroutine("blockLoop");
-         }
+			if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began) {
+				begin = false;
+				mainCamera.speed = cameraSpeed;
+				StartCoroutine ("blockLoop");
+				StartCoroutine ("score");
+			}
 
 #endif
-        }
-    }
+		}
+	}
 
-    IEnumerator start()
-    {
-        yield return new WaitForSeconds(1);
-        mainCamera.speed = cameraSpeed;
-        StartCoroutine("blockLoop");
-    }
+	IEnumerator start ()
+	{
+		yield return new WaitForSeconds (1);
+		mainCamera.speed = cameraSpeed;
+		StartCoroutine ("blockLoop");
+	}
 
-    IEnumerator blockLoop()
-    {
-        instantiateCells(dropSpeed);
-        yield return new WaitForSeconds(delayDuration);
-        instantiateBlock(dropSpeed);
-        yield return new WaitForSeconds(delayDuration);
-        loop();
-        StartCoroutine("blockLoop");
-    }
+	IEnumerator score ()
+	{
+		playerScore += (scoreModifier * (initialScorePerSecond * scoreUpdateRate));
+		scoreText.text = playerScore.ToString () + " x" + scoreModifier;
+		yield return new WaitForSeconds (scoreUpdateRate);
+		StartCoroutine ("score");
+	}
 
-    void loop()
-    {
-        loopCount += 1;
-        loopCount %= loopCountLevel;
-        if (loopCount == 0)
-        {
-            loopCountLevel += loopCountModifier;
-            dropSpeed += dropSpeedModifier;
-            delayDuration -= delayDurtionModifier;
-            cameraSpeed += cameraSpeedModifier;
-            mainCamera.speed = cameraSpeed;
-        }
-    }
+	IEnumerator blockLoop ()
+	{
+		instantiateCells ();
+		yield return new WaitForSeconds (delayDuration);
+		instantiateBlock ();
+		yield return new WaitForSeconds (delayDuration);
+		loop ();
+		StartCoroutine ("blockLoop");
+	}
 
-    void instantiateCells(float speed)
-    {
-        Instantiate(cellRandomiser(), transform.position, transform.rotation);
-    }
+	void loop ()
+	{
+		loopCount += 1;
+		loopCount %= loopCountLevel;
+		if (loopCount == 0) {
+			//loopCountLevel *= (int)loopCountModifier;
+			if (delayDuration > delayDurationFloor) {
+				delayDuration -= delayDurtionModifier;
+			}
+			if (cameraSpeed < cameraSpeedCeiling) {
+				cameraSpeed += cameraSpeedModifier;
+				mainCamera.speed = cameraSpeed;
+			}
+			scoreModifier += scoreModifierRate;
+		}
+	}
 
-    void instantiateBlock(float speed)
-    {
-        Instantiate(blockRandomiser(), transform.position, Quaternion.identity);
-    }
+	void instantiateCells ()
+	{
+		Instantiate (cellRandomiser (), transform.position, transform.rotation);
+	}
 
-    GameObject blockRandomiser()
-    {
-        return blockGroups[Random.Range(0, blockGroups.Length)];
-    }
+	void instantiateBlock ()
+	{
+		Instantiate (blockRandomiser (), transform.position, Quaternion.identity);
+	}
 
-    GameObject cellRandomiser()
-    {
-        return cellGroups[Random.Range(0, cellGroups.Length)];
-    }
+	GameObject blockRandomiser ()
+	{
+		return blockGroups [Random.Range (0, blockGroups.Length)];
+	}
 
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = new Color(1, 0, 0, 0.5F);
-        Gizmos.DrawCube(transform.position, new Vector3(1, 1, 1));
-    }
+	GameObject cellRandomiser ()
+	{
+		return cellGroups [Random.Range (0, cellGroups.Length)];
+	}
+
+	public void onEnd ()
+	{
+		endTime = Time.time;
+		StopCoroutine ("score");
+		loopCountLevel = 1000000000;
+		gameOverText.text = "Energy Depleated\nFinal Score: " + playerScore + "\nPlay again?";
+	}
+
+	public void restart ()
+	{
+		if (Time.time - endTime > 0.5f) {
+			SceneManager.LoadScene ("Game");
+		}
+	}
+
+	void OnDrawGizmosSelected ()
+	{
+		Gizmos.color = new Color (1, 0, 0, 0.5F);
+		Gizmos.DrawCube (transform.position, new Vector3 (1, 1, 1));
+	}
 }
