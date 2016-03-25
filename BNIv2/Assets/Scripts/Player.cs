@@ -5,14 +5,11 @@ using System.Collections;
 public class Player : MonoBehaviour
 {
 
-	public Rigidbody2D Rigidbody;
+	Rigidbody2D Rigidbody;
 	public float movementSpeed;
 	public float jumpSpeed;
-
-	public BlockManager manager;
-
-	public Slider powerSlider;
-	public GameObject gameOver;
+	Slider powerSlider;
+	GameObject gameOver;
 	public float powerConsumption;
 	public float cellPowerRegain;
 	public float outOfBoundsDrop;
@@ -31,7 +28,13 @@ public class Player : MonoBehaviour
 		}
 	}
 
-
+	void Start ()
+	{
+		Rigidbody = GetComponent<Rigidbody2D> ();
+		gameOver = GameObject.FindGameObjectWithTag ("GameOver");
+		powerSlider = GameObject.FindGameObjectWithTag ("PowerSlider").GetComponent<Slider> ();
+	}
+		
 	// Update is called once per frame
 	void Update ()
 	{
@@ -39,8 +42,7 @@ public class Player : MonoBehaviour
 			#if UNITY_STANDALONE || UNITY_WEBGL || UNITY_EDITOR
 
 			if (Input.GetButtonDown ("Horizontal")) {
-				Rigidbody.AddForce (new Vector3 (movementSpeed * Input.GetAxisRaw ("Horizontal"), 0, 0));
-				Rigidbody.AddForce (new Vector3 (0, jumpSpeed, 0));
+				Rigidbody.velocity = new Vector2 (movementSpeed * Input.GetAxisRaw ("Horizontal"), jumpSpeed);
 				playerPower -= powerConsumption;
 			}
 
@@ -60,8 +62,8 @@ public class Player : MonoBehaviour
 		} else {
 			if (!gameOverFlag) {
 				gameOverFlag = true;
-				manager.onEnd ();
-				gameOver.SetActive (true);
+				gameOver.GetComponent<Text> ().color = 
+					new Color (Color.yellow.r, Color.yellow.g, Color.yellow.b, 1);
 			}
 		}
 	}

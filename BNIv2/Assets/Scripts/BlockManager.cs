@@ -7,20 +7,20 @@ using System.Collections.Generic;
 public class BlockManager : MonoBehaviour
 {
 
-	public CameraMovement mainCamera;
+	CameraMovement mainCamera;
 	public float initialCameraSpeed;
 	public float cameraSpeedModifier;
 	public float cameraSpeedCeiling;
 	float cameraSpeed;
 
-	public Text scoreText;
+	Text scoreText;
 	public int initialScorePerSecond;
 	public float scoreUpdateRate;
 	public float scoreModifierRate;
 	float scoreModifier;
 	float playerScore;
 
-	public Text gameOverText;
+	Text gameOverText;
 
 	public GameObject[] blockGroups;
 
@@ -43,6 +43,9 @@ public class BlockManager : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
+		mainCamera = GetComponent<CameraMovement> ();
+		scoreText = GameObject.FindGameObjectWithTag ("ScoreText").GetComponent<Text> ();
+		gameOverText = GameObject.FindGameObjectWithTag ("GameOver").GetComponent<Text> ();
 		cameraSpeed = initialCameraSpeed;
 		delayDuration = initialDelayDuration;
 		loopCountLevel = initialLoopCountLevel;
@@ -123,7 +126,7 @@ public class BlockManager : MonoBehaviour
 
 	void instantiateBlock ()
 	{
-		Instantiate (blockRandomiser (), transform.position, Quaternion.identity);
+		Instantiate (blockRandomiser (), new Vector2 (transform.position.x, transform.position.y), Quaternion.identity);
 	}
 
 	GameObject blockRandomiser ()

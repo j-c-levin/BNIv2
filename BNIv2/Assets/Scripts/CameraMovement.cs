@@ -6,7 +6,6 @@ public class CameraMovement : MonoBehaviour
 
 	public float adaptiveSize;
 	public float adaptiveTranslation;
-	public GameObject manager;
 	public float speed;
 
 	void Start ()
@@ -32,7 +31,6 @@ public class CameraMovement : MonoBehaviour
 			managery = 10f;
 		}
 		transform.position = new Vector3 (0, managery, -10); 
-		manager.transform.position = new Vector3 (0, managery * 2, 0);
 	}
 	
 	// Update is called once per frame
